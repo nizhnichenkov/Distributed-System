@@ -1,0 +1,64 @@
+version: '3'
+services:
+  activemq:
+    hostname: activemq
+    image: "rmohr/activemq:latest"
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    restart: always
+    volumes:
+      - ./data/activemq:/data/activemq
+      - ./var/log/activemq:/var/log/activemq
+
+  userAPI:
+    build: "userAPI"
+    image: "userapi:latest"
+    depends_on:
+      - RIPAPI
+    ports:
+      - 8083:8083
+
+  coffinAPI:
+    build: "coffinAPI"
+    image: "coffinapi:latest"
+    depends_on:
+      - RIPAPI
+    ports:
+      - 8084:8084
+
+  cleanAPI:
+    build: "cleanAPI"
+    image: "cleanapi:latest"
+    depends_on:
+      - RIPAPI
+    ports:
+      - 8086:8086
+
+  RIPAPI:
+    build: "RIPAPI"
+    image: "ripapi:latest"
+    ports:
+      - 8080:8080
+
+  ui:
+    build: "ui"
+    image: "ui:latest"
+    ports:
+      - 8089:8089
+
+  imageAPI:
+    build: "imageAPI"
+    image: "imageapi:latest"
+    depends_on:
+      - activemq
+      - RIPAPI
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on: 
+      - ui
+    ports: 
+      - "8081:8081"
